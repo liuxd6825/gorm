@@ -124,6 +124,10 @@ func ParseWithSpecialTableName(dest interface{}, cacheStore *sync.Map, namer Nam
 		return nil, fmt.Errorf("%w: %+v", ErrUnsupportedDataType, dest)
 	}
 
+	if schema, ok := dest.(*Schema); ok {
+		return schema, nil
+	}
+
 	value := reflect.ValueOf(dest)
 	if value.Kind() == reflect.Ptr && value.IsNil() {
 		value = reflect.New(value.Type().Elem())

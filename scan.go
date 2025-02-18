@@ -149,10 +149,12 @@ func Scan(rows Rows, db *DB, mode ScanMode) {
 	db.RowsAffected = 0
 
 	// liuxd
-	if db.Statement.MapSchema != nil {
-		scanMapList(initialized, rows, db, values, columns, db.Statement.Dest)
-		return
-	}
+	/*
+		if db.Statement.MapSchema != nil  {
+			scanMapList(initialized, rows, db, values, columns, db.Statement.Dest)
+			return
+		}
+	*/
 
 	switch dest := db.Statement.Dest.(type) {
 	case map[string]interface{}, *map[string]interface{}:
@@ -184,7 +186,7 @@ func Scan(rows Rows, db *DB, mode ScanMode) {
 			db.AddError(rows.Scan(values...))
 
 			mapValue := map[string]interface{}{}
-			scanIntoMap(mapValue, values, columns)
+			_scanIntoMap(mapValue, values, columns, db)
 			*dest = append(*dest, mapValue)
 		}
 	case *int, *int8, *int16, *int32, *int64,

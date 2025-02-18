@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
+	"gorm.io/gorm/schema"
 	"reflect"
 )
 
@@ -31,26 +32,29 @@ func scanMapList(initialized bool, rows Rows, db *DB, values []any, columns []st
 }
 
 func _scanIntoMap(mapValue map[string]interface{}, values []interface{}, columns []string, db *DB) {
+	defer func() {
+		if r := recover(); r != nil {
+			panic(r)
+		}
+	}()
 	for idx, column := range columns {
 		value := values[idx]
 		field, ok := db.Statement.Schema.FieldsByDBName[column]
 		if ok {
 			column = field.Name
-			if field.DataType == "object" {
+			if field.DataType == schema.Object || field.DataType == schema.Array {
 				val := getJsonText(value)
-				data := make(map[string]any)
-				err := json.Unmarshal([]byte(val), data)
-				if err != nil {
-					panic(err)
+				var data any
+				if field.DataType == schema.Object {
+					data = make(map[string]any)
+				} else {
+					data = make([]any, 0)
 				}
-				mapValue[column] = data
-				continue
-			} else if field.DataType == "array" {
-				val := getJsonText(value)
-				data := make([]any, 0)
-				err := json.Unmarshal([]byte(val), &data)
-				if err != nil {
-					panic(err)
+				if len(val) > 0 {
+					err := json.Unmarshal([]byte(val), &data)
+					if err != nil {
+						panic(err)
+					}
 				}
 				mapValue[column] = data
 				continue
@@ -72,9 +76,14 @@ func _scanIntoMap(mapValue map[string]interface{}, values []interface{}, columns
 func getJsonText(value any) string {
 	res := ""
 	if s, ok := value.(**string); ok {
-		res = **s
+		if s != nil && *s != nil {
+			res = **s
+		}
+
 	} else if s, ok := value.(*string); ok {
-		res = *s
+		if s != nil {
+			res = *s
+		}
 	} else if s, ok := value.(string); ok {
 		res = s
 	}

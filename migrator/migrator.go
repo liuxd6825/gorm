@@ -82,6 +82,10 @@ func (m Migrator) DataTypeOf(field *schema.Field) string {
 			return dataType
 		}
 	}
+	// liuxd 将array和object以varchar类型存储
+	if field.DataType == schema.Array || field.DataType == schema.Object {
+		return m.Dialector.DataTypeOf(&schema.Field{DataType: schema.String, Size: 5000})
+	}
 
 	return m.Dialector.DataTypeOf(field)
 }

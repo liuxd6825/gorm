@@ -1,6 +1,7 @@
 package gorm
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -767,5 +768,9 @@ func (db *DB) Exec(sql string, values ...interface{}) (tx *DB) {
 		clause.Expr{SQL: sql, Vars: values}.Build(tx.Statement)
 	}
 
-	return tx.callbacks.Raw().Execute(tx)
+	res := tx.callbacks.Raw().Execute(tx)
+	if res.Error != nil {
+		db.Logger.Error(context.Background(), tx.Statement.SQL.String())
+	}
+	return res
 }

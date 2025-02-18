@@ -37,6 +37,7 @@ type Statement struct {
 	Preloads             map[string][]interface{}
 	Settings             sync.Map
 	ConnPool             ConnPool
+	MapSchema            *schema.Schema // liuxd 为MapEntity定义的schema
 	Schema               *schema.Schema
 	Context              context.Context
 	RaiseErrorOnNotFound bool
@@ -490,7 +491,18 @@ func (stmt *Statement) Parse(value interface{}) (err error) {
 }
 
 func (stmt *Statement) ParseWithSpecialTableName(value interface{}, specialTableName string) (err error) {
-	if stmt.Schema, err = schema.ParseWithSpecialTableName(value, stmt.DB.cacheStore, stmt.DB.NamingStrategy, specialTableName); err == nil && stmt.Table == "" {
+	sch := stmt.Schema
+	if stmt.MapSchema != nil {
+		sch = stmt.MapSchema
+	} else {
+		sch, err = schema.ParseWithSpecialTableName(value, stmt.DB.cacheStore, stmt.DB.NamingStrategy, specialTableName)
+		if err != nil {
+			return err
+		}
+	}
+
+	stmt.Schema = sch
+	if err == nil && stmt.Table == "" {
 		if tables := strings.Split(stmt.Schema.Table, "."); len(tables) == 2 {
 			stmt.TableExpr = &clause.Expr{SQL: stmt.Quote(stmt.Schema.Table)}
 			stmt.Table = tables[1]

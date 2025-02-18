@@ -1,6 +1,7 @@
 package callbacks
 
 import (
+	"encoding/json"
 	"reflect"
 	"sort"
 
@@ -24,6 +25,13 @@ func ConvertMapToValuesForCreate(stmt *gorm.Statement, mapValue map[string]inter
 		if stmt.Schema != nil {
 			if field := stmt.Schema.LookUpField(k); field != nil {
 				k = field.DBName
+				if field.DataType == "object" || field.DataType == "array" {
+					if val, err := json.Marshal(value); err == nil {
+						value = val
+					} else {
+						panic(err)
+					}
+				}
 			}
 		}
 

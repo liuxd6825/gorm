@@ -126,7 +126,8 @@ func (p *processor) Execute(db *DB) *DB {
 		}
 	}
 
-	for _, f := range p.fns {
+	for i, f := range p.fns {
+		fmt.Printf("index fn %d", i)
 		f(db)
 	}
 

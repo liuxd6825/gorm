@@ -59,6 +59,37 @@ type Schema struct {
 	cacheStore                *sync.Map
 }
 
+func NewSchema(name string, modelType reflect.Type, tableName string) *Schema {
+	return &Schema{
+		Name:                     name,
+		ModelType:                modelType,
+		Table:                    tableName,
+		DBNames:                  make([]string, 0),
+		PrimaryFields:            make([]*Field, 0),
+		PrimaryFieldDBNames:      make([]string, 0),
+		Fields:                   make([]*Field, 0),
+		FieldsByName:             map[string]*Field{},
+		FieldsByBindName:         map[string]*Field{},
+		FieldsByDBName:           map[string]*Field{},
+		FieldsWithDefaultDBValue: make([]*Field, 0),
+		Relationships:            Relationships{},
+		CreateClauses:            make([]clause.Interface, 0),
+		QueryClauses:             make([]clause.Interface, 0),
+		UpdateClauses:            make([]clause.Interface, 0),
+		DeleteClauses:            make([]clause.Interface, 0),
+		BeforeCreate:             false,
+		AfterCreate:              false,
+		BeforeUpdate:             false,
+		AfterUpdate:              false,
+		BeforeDelete:             false,
+		AfterDelete:              false,
+		BeforeSave:               false,
+		AfterSave:                false,
+		AfterFind:                false,
+		err:                      nil,
+	}
+}
+
 func (schema Schema) String() string {
 	if schema.ModelType.Name() == "" {
 		return fmt.Sprintf("%s(%s)", schema.Name, schema.Table)

@@ -168,6 +168,7 @@ func (db *DB) Find(dest interface{}, conds ...interface{}) (tx *DB) {
 	}
 	tx.Statement.Dest = dest
 	return tx.callbacks.Query().Execute(tx)
+
 }
 
 // FindInBatches finds all records in batches of batchSize

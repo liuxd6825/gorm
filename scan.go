@@ -15,7 +15,13 @@ func prepareValues(values []interface{}, db *DB, columnTypes []*sql.ColumnType, 
 	if db.Statement.Schema != nil {
 		for idx, name := range columns {
 			if field := db.Statement.Schema.LookUpField(name); field != nil {
-				values[idx] = reflect.New(reflect.PtrTo(field.FieldType)).Interface()
+				switch field.DataType {
+				case "array", "object":
+					strType := reflect.TypeOf("")
+					values[idx] = reflect.New(reflect.PtrTo(strType)).Interface()
+				default:
+					values[idx] = reflect.New(reflect.PtrTo(field.FieldType)).Interface()
+				}
 				continue
 			}
 			values[idx] = new(interface{})
@@ -141,6 +147,12 @@ func Scan(rows Rows, db *DB, mode ScanMode) {
 	}
 
 	db.RowsAffected = 0
+
+	// liuxd
+	if db.Statement.MapSchema != nil {
+		scanMapList(initialized, rows, db, values, columns, db.Statement.Dest)
+		return
+	}
 
 	switch dest := db.Statement.Dest.(type) {
 	case map[string]interface{}, *map[string]interface{}:

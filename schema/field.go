@@ -47,6 +47,8 @@ const (
 	String DataType = "string"
 	Time   DataType = "time"
 	Bytes  DataType = "bytes"
+	Object DataType = "object"
+	Array  DataType = "array"
 )
 
 const DefaultAutoIncrementIncrement int64 = 1

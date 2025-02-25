@@ -1,6 +1,7 @@
 package callbacks
 
 import (
+	"encoding/json"
 	"reflect"
 	"sort"
 
@@ -206,6 +207,15 @@ func ConvertToAssignments(stmt *gorm.Statement) (set clause.Set) {
 
 			if stmt.Schema != nil {
 				if field := stmt.Schema.LookUpField(k); field != nil {
+					// liuxd lxd
+					if field.DataType == "object" || field.DataType == "array" {
+						if val, err := json.Marshal(kv); err == nil {
+							kv = val
+						} else {
+							panic(err)
+						}
+					}
+
 					if field.DBName != "" {
 						if v, ok := selectColumns[field.DBName]; (ok && v) || (!ok && !restricted) {
 							set = append(set, clause.Assignment{Column: clause.Column{Name: field.DBName}, Value: kv})

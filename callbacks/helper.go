@@ -25,6 +25,7 @@ func ConvertMapToValuesForCreate(stmt *gorm.Statement, mapValue map[string]inter
 		if stmt.Schema != nil {
 			if field := stmt.Schema.LookUpField(k); field != nil {
 				k = field.DBName
+				// liuxd lxd
 				if field.DataType == "object" || field.DataType == "array" {
 					if val, err := json.Marshal(value); err == nil {
 						value = val
@@ -68,6 +69,15 @@ func ConvertSliceOfMapToValuesForCreate(stmt *gorm.Statement, mapValues []map[st
 			if stmt.Schema != nil {
 				if field := stmt.Schema.LookUpField(k); field != nil {
 					k = field.DBName
+					// liuxd lxd
+					value := mapValue[k]
+					if field.DataType == "object" || field.DataType == "array" {
+						if val, err := json.Marshal(value); err == nil {
+							value = val
+						} else {
+							panic(err)
+						}
+					}
 				}
 			}
 

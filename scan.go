@@ -174,7 +174,8 @@ func Scan(rows Rows, db *DB, mode ScanMode) {
 					mapValue = *v
 				}
 			}
-			scanIntoMap(mapValue, values, columns)
+			_scanIntoMap(mapValue, values, columns, db)
+			//scanIntoMap(mapValue, values, columns)
 		}
 	case *[]map[string]interface{}:
 		columnTypes, _ := rows.ColumnTypes()

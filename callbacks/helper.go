@@ -22,6 +22,11 @@ func ConvertMapToValuesForCreate(stmt *gorm.Statement, mapValue map[string]inter
 
 	for _, k := range keys {
 		value := mapValue[k]
+		// liuxd lxd 日期类型
+		if date, ok := value.(gorm.Date); ok {
+			value = date.Time()
+		}
+		
 		if stmt.Schema != nil {
 			if field := stmt.Schema.LookUpField(k); field != nil {
 				k = field.DBName

@@ -205,6 +205,11 @@ func ConvertToAssignments(stmt *gorm.Statement) (set clause.Set) {
 				kv = []interface{}{kv}
 			}
 
+			// liuxd lxd 日期类型
+			if date, ok := kv.(gorm.Date); ok {
+				kv = date.Time()
+			}
+
 			if stmt.Schema != nil {
 				if field := stmt.Schema.LookUpField(k); field != nil {
 					// liuxd lxd

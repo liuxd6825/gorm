@@ -6,7 +6,14 @@ import (
 	"encoding/json"
 	"gorm.io/gorm/schema"
 	"reflect"
+	"time"
 )
+
+type Date interface {
+	Time() time.Time
+	IsNil() bool
+	PTime() *time.Time
+}
 
 func scanMapList(initialized bool, rows Rows, db *DB, values []any, columns []string, dest any) []map[string]any {
 	list, ok := dest.(*[]map[string]any)

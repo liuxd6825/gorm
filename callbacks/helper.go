@@ -26,7 +26,7 @@ func ConvertMapToValuesForCreate(stmt *gorm.Statement, mapValue map[string]inter
 		if date, ok := value.(gorm.Date); ok {
 			value = date.Time()
 		}
-		
+
 		if stmt.Schema != nil {
 			if field := stmt.Schema.LookUpField(k); field != nil {
 				k = field.DBName
@@ -78,7 +78,7 @@ func ConvertSliceOfMapToValuesForCreate(stmt *gorm.Statement, mapValues []map[st
 					value := mapValue[k]
 					if field.DataType == "object" || field.DataType == "array" {
 						if val, err := json.Marshal(value); err == nil {
-							value = val
+							v = val
 						} else {
 							panic(err)
 						}

@@ -5,17 +5,16 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"gorm.io/gorm/clause"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
+	"gorm.io/gorm/utils"
 	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
-
-	"gorm.io/gorm/clause"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
-	"gorm.io/gorm/utils"
 )
 
 // Statement statement
@@ -255,6 +254,10 @@ func (stmt *Statement) AddVar(writer clause.Writer, vars ...interface{}) {
 					writer.WriteByte(')')
 				}
 			default:
+				// liuxd
+				if tVal, ok := v.(ITime); ok {
+					v = tVal.Time()
+				}
 				stmt.Vars = append(stmt.Vars, v)
 				stmt.DB.Dialector.BindVarTo(writer, stmt, v)
 			}

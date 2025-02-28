@@ -3,6 +3,7 @@ package gorm
 import (
 	"database/sql"
 	"database/sql/driver"
+	"fmt"
 	"gorm.io/gorm/schema"
 	"reflect"
 	"time"
@@ -47,16 +48,19 @@ func scanMapList(initialized bool, rows Rows, db *DB, values []any, columns []st
 }
 
 func _scanIntoMap(mapValue map[string]interface{}, values []interface{}, columns []string, db *DB) {
+	var column string
 	defer func() {
 		if r := recover(); r != nil {
-			panic(r)
+			err := fmt.Errorf("_scanIntoMap() column=%s %v", column, r)
+			panic(err)
 		}
 	}()
-	for idx, column := range columns {
+	for idx, c := range columns {
+		column = c
 		value := values[idx]
 		field, ok := db.Statement.Schema.FieldsByDBName[column]
-		column = field.Name // 字段名转为属性名
 		if ok {
+			column = field.Name // 字段名转为属性名
 			if GetDbToGoValue != nil {
 				if val, ok := GetDbToGoValue(db, field, value); ok {
 					mapValue[column] = val
@@ -118,4 +122,12 @@ func scanMap(initialized bool, rows Rows, db *DB, values []any, columns []string
 		scanIntoMap(mapValue, values, columns)
 	}
 	return nil
+}
+
+type IDate interface {
+	Date() time.Time
+}
+
+type ITime interface {
+	Time() time.Time
 }

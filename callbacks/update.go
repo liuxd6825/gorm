@@ -1,7 +1,6 @@
 package callbacks
 
 import (
-	"encoding/json"
 	"reflect"
 	"sort"
 
@@ -205,19 +204,12 @@ func ConvertToAssignments(stmt *gorm.Statement) (set clause.Set) {
 				kv = []interface{}{kv}
 			}
 
-			// liuxd lxd 日期类型
-			if date, ok := kv.(gorm.Date); ok {
-				kv = date.Time()
-			}
-
 			if stmt.Schema != nil {
 				if field := stmt.Schema.LookUpField(k); field != nil {
-					// liuxd lxd
-					if field.DataType == "object" || field.DataType == "array" {
-						if val, err := json.Marshal(kv); err == nil {
+					// liuxd
+					if gorm.GetGoToDbValue != nil {
+						if val, ok := gorm.GetGoToDbValue(stmt.DB, field, kv); ok {
 							kv = val
-						} else {
-							panic(err)
 						}
 					}
 

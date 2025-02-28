@@ -55,6 +55,7 @@ func _scanIntoMap(mapValue map[string]interface{}, values []interface{}, columns
 	for idx, column := range columns {
 		value := values[idx]
 		field, ok := db.Statement.Schema.FieldsByDBName[column]
+		column = field.Name // 字段名转为属性名
 		if ok {
 			if GetDbToGoValue != nil {
 				if val, ok := GetDbToGoValue(db, field, value); ok {

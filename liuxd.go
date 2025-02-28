@@ -3,7 +3,6 @@ package gorm
 import (
 	"database/sql"
 	"database/sql/driver"
-	"encoding/json"
 	"gorm.io/gorm/schema"
 	"reflect"
 	"time"
@@ -14,6 +13,15 @@ type Date interface {
 	IsNil() bool
 	PTime() *time.Time
 }
+
+type GoToDbValueFunc func(db *DB, field *schema.Field, value any) (any, bool)
+type DbToGoValueFunc func(db *DB, field *schema.Field, value any) (any, bool)
+
+// GetGoToDbValue 将go值转换成db值
+var GetGoToDbValue GoToDbValueFunc
+
+// GetDbToGoValue 将db值转换成go值
+var GetDbToGoValue DbToGoValueFunc
 
 func scanMapList(initialized bool, rows Rows, db *DB, values []any, columns []string, dest any) []map[string]any {
 	list, ok := dest.(*[]map[string]any)
@@ -48,25 +56,14 @@ func _scanIntoMap(mapValue map[string]interface{}, values []interface{}, columns
 		value := values[idx]
 		field, ok := db.Statement.Schema.FieldsByDBName[column]
 		if ok {
-			column = field.Name
-			if field.DataType == schema.Object || field.DataType == schema.Array {
-				val := getJsonText(value)
-				var data any
-				if field.DataType == schema.Object {
-					data = make(map[string]any)
-				} else {
-					data = make([]any, 0)
+			if GetGoToDbValue != nil {
+				if val, ok := GetDbToGoValue(db, field, value); ok {
+					mapValue[column] = val
+					continue
 				}
-				if len(val) > 0 {
-					err := json.Unmarshal([]byte(val), &data)
-					if err != nil {
-						panic(err)
-					}
-				}
-				mapValue[column] = data
-				continue
 			}
 		}
+
 		if reflectValue := reflect.Indirect(reflect.Indirect(reflect.ValueOf(values[idx]))); reflectValue.IsValid() {
 			mapValue[column] = reflectValue.Interface()
 			if valuer, ok := mapValue[column].(driver.Valuer); ok {

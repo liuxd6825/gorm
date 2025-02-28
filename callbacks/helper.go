@@ -22,20 +22,15 @@ func ConvertMapToValuesForCreate(stmt *gorm.Statement, mapValue map[string]inter
 
 	for _, k := range keys {
 		value := mapValue[k]
-		// liuxd lxd 日期类型
-		if date, ok := value.(gorm.Date); ok {
-			value = date.Time()
-		}
 
 		if stmt.Schema != nil {
 			if field := stmt.Schema.LookUpField(k); field != nil {
 				k = field.DBName
-				// liuxd lxd
-				if field.DataType == "object" || field.DataType == "array" {
-					if val, err := json.Marshal(value); err == nil {
+
+				// liuxd lxd 日期待类型
+				if gorm.GetGoToDbValue != nil {
+					if val, ok := gorm.GetGoToDbValue(stmt.DB, field, value); ok {
 						value = val
-					} else {
-						panic(err)
 					}
 				}
 			}

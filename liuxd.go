@@ -56,7 +56,7 @@ func _scanIntoMap(mapValue map[string]interface{}, values []interface{}, columns
 		value := values[idx]
 		field, ok := db.Statement.Schema.FieldsByDBName[column]
 		if ok {
-			if GetGoToDbValue != nil {
+			if GetDbToGoValue != nil {
 				if val, ok := GetDbToGoValue(db, field, value); ok {
 					mapValue[column] = val
 					continue

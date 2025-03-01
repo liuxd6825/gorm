@@ -46,6 +46,7 @@ const (
 	Float  DataType = "float"
 	String DataType = "string"
 	Time   DataType = "time"
+	Date   DataType = "date"
 	Bytes  DataType = "bytes"
 	Object DataType = "object"
 	Array  DataType = "array"
@@ -276,7 +277,7 @@ func (schema *Schema) ParseField(fieldStruct reflect.StructField) *Field {
 		} else if fieldValue.Type().ConvertibleTo(TimePtrReflectType) {
 			field.DataType = Time
 		}
-		if field.HasDefaultValue && !skipParseDefaultValue && field.DataType == Time {
+		if field.HasDefaultValue && !skipParseDefaultValue && (field.DataType == Time || field.DataType == Date) {
 			if t, err := now.Parse(field.DefaultValue); err == nil {
 				field.DefaultValueInterface = t
 			}
@@ -291,8 +292,8 @@ func (schema *Schema) ParseField(fieldStruct reflect.StructField) *Field {
 		field.DataType = DataType(dataTyper.GormDataType())
 	}
 
-	if v, ok := field.TagSettings["AUTOCREATETIME"]; (ok && utils.CheckTruth(v)) || (!ok && field.Name == "CreatedAt" && (field.DataType == Time || field.DataType == Int || field.DataType == Uint)) {
-		if field.DataType == Time {
+	if v, ok := field.TagSettings["AUTOCREATETIME"]; (ok && utils.CheckTruth(v)) || (!ok && field.Name == "CreatedAt" && (field.DataType == Time || field.DataType == Date || field.DataType == Int || field.DataType == Uint)) {
+		if field.DataType == Time || field.DataType == Date {
 			field.AutoCreateTime = UnixTime
 		} else if strings.ToUpper(v) == "NANO" {
 			field.AutoCreateTime = UnixNanosecond
@@ -303,8 +304,8 @@ func (schema *Schema) ParseField(fieldStruct reflect.StructField) *Field {
 		}
 	}
 
-	if v, ok := field.TagSettings["AUTOUPDATETIME"]; (ok && utils.CheckTruth(v)) || (!ok && field.Name == "UpdatedAt" && (field.DataType == Time || field.DataType == Int || field.DataType == Uint)) {
-		if field.DataType == Time {
+	if v, ok := field.TagSettings["AUTOUPDATETIME"]; (ok && utils.CheckTruth(v)) || (!ok && field.Name == "UpdatedAt" && (field.DataType == Time || field.DataType == Date || field.DataType == Int || field.DataType == Uint)) {
+		if field.DataType == Time || field.DataType == Date {
 			field.AutoUpdateTime = UnixTime
 		} else if strings.ToUpper(v) == "NANO" {
 			field.AutoUpdateTime = UnixNanosecond
@@ -321,7 +322,7 @@ func (schema *Schema) ParseField(fieldStruct reflect.StructField) *Field {
 
 	if val, ok := field.TagSettings["TYPE"]; ok {
 		switch DataType(strings.ToLower(val)) {
-		case Bool, Int, Uint, Float, String, Time, Bytes:
+		case Bool, Int, Uint, Float, String, Time, Date, Bytes:
 			field.DataType = DataType(strings.ToLower(val))
 		default:
 			field.DataType = DataType(val)

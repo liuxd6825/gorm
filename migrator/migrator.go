@@ -546,7 +546,7 @@ func (m Migrator) MigrateColumn(value interface{}, field *schema.Field, columnTy
 			alterColumn = true
 		} else if currentDefaultNotNull || dvNotNull {
 			switch field.GORMDataType {
-			case schema.Time:
+			case schema.Time, schema.Date:
 				if !strings.EqualFold(strings.TrimSuffix(dv, "()"), strings.TrimSuffix(field.DefaultValue, "()")) {
 					alterColumn = true
 				}

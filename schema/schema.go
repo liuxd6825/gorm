@@ -375,7 +375,7 @@ func ParseWithSpecialTableName(dest interface{}, cacheStore *sync.Map, namer Nam
 		for _, field := range schema.Fields {
 			if field.DataType == "" && field.GORMDataType == "" && (field.Creatable || field.Updatable || field.Readable) {
 				if schema.parseRelation(field); schema.err != nil {
-					return schema, schema.err
+					return schema, errors.New(fmt.Sprintf("gorm %s %s", field.Name, schema.err.Error()))
 				} else {
 					schema.FieldsByName[field.Name] = field
 					schema.FieldsByBindName[field.BindName()] = field

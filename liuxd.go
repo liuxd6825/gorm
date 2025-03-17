@@ -51,10 +51,13 @@ func _scanIntoMap(mapValue map[string]interface{}, values []interface{}, columns
 	var column string
 	defer func() {
 		if r := recover(); r != nil {
-			err := fmt.Errorf("_scanIntoMap() column=%s %v", column, r)
+			err := fmt.Errorf("grom._scanIntoMap() column=%s %v", column, r)
 			panic(err)
 		}
 	}()
+	if db.Statement.Schema==nil {
+		panic("gorm: db.Statement.Schema is not null")
+	}
 	for idx, c := range columns {
 		column = c
 		value := values[idx]

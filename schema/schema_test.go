@@ -317,6 +317,7 @@ func TestCompositePrimaryKeyWithAutoIncrement(t *testing.T) {
 		Code         string
 		Name         string
 	}
+
 	type ProductNonAutoIncrement struct {
 		ProductID    uint `gorm:"primaryKey;autoIncrement:false"`
 		LanguageCode uint `gorm:"primaryKey"`

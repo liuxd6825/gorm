@@ -22,9 +22,9 @@ func (db *DB) Model(value interface{}) (tx *DB) {
 	return
 }
 
-func (db *DB) MapSchema(sch *schema.Schema) (tx *DB) {
+func (db *DB) CustomSchema(sch *schema.Schema) (tx *DB) {
 	tx = db.getInstance()
-	tx.Statement.MapSchema = sch
+	tx.Statement.CustomSchema = sch
 	tx.Statement.Schema = sch
 	return
 }

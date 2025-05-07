@@ -1,7 +1,6 @@
 package callbacks
 
 import (
-	"encoding/json"
 	"reflect"
 	"sort"
 
@@ -71,11 +70,9 @@ func ConvertSliceOfMapToValuesForCreate(stmt *gorm.Statement, mapValues []map[st
 					k = field.DBName
 					// liuxd lxd
 					value := mapValue[k]
-					if field.DataType == "object" || field.DataType == "array" {
-						if val, err := json.Marshal(value); err == nil {
+					if gorm.GetGoToDbValue != nil {
+						if val, ok := gorm.GetGoToDbValue(stmt.DB, field, value); ok {
 							v = val
-						} else {
-							panic(err)
 						}
 					}
 				}

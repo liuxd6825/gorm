@@ -67,31 +67,38 @@ type Field struct {
 	Creatable              bool
 	Updatable              bool
 	Readable               bool
-	AutoCreateTime         TimeType
-	AutoUpdateTime         TimeType
-	HasDefaultValue        bool
-	DefaultValue           string
-	DefaultValueInterface  interface{}
-	NotNull                bool
-	Unique                 bool
-	Comment                string
-	Size                   int
-	Precision              int
-	Scale                  int
-	IgnoreMigration        bool
-	FieldType              reflect.Type
-	IndirectFieldType      reflect.Type
-	StructField            reflect.StructField
-	Tag                    reflect.StructTag
-	TagSettings            map[string]string
-	Schema                 *Schema
-	EmbeddedSchema         *Schema
-	OwnerSchema            *Schema
-	ReflectValueOf         func(context.Context, reflect.Value) reflect.Value
-	ValueOf                func(context.Context, reflect.Value) (value interface{}, zero bool)
-	Set                    func(context.Context, reflect.Value, interface{}) error
-	Serializer             SerializerInterface
-	NewValuePool           FieldNewValuePool
+
+	RelType         bool
+	RelStartId      bool
+	RelEndId        bool
+	NodeLabelFormat string
+	NodeLabel       bool
+
+	AutoCreateTime        TimeType
+	AutoUpdateTime        TimeType
+	HasDefaultValue       bool
+	DefaultValue          string
+	DefaultValueInterface interface{}
+	NotNull               bool
+	Unique                bool
+	Comment               string
+	Size                  int
+	Precision             int
+	Scale                 int
+	IgnoreMigration       bool
+	FieldType             reflect.Type
+	IndirectFieldType     reflect.Type
+	StructField           reflect.StructField
+	Tag                   reflect.StructTag
+	TagSettings           map[string]string
+	Schema                *Schema
+	EmbeddedSchema        *Schema
+	OwnerSchema           *Schema
+	ReflectValueOf        func(context.Context, reflect.Value) reflect.Value
+	ValueOf               func(context.Context, reflect.Value) (value interface{}, zero bool)
+	Set                   func(context.Context, reflect.Value, interface{}) error
+	Serializer            SerializerInterface
+	NewValuePool          FieldNewValuePool
 
 	// In some db (e.g. MySQL), Unique and UniqueIndex are indistinguishable.
 	// When a column has a (not Mul) UniqueIndex, Migrator always reports its gorm.ColumnType is Unique.
@@ -341,6 +348,26 @@ func (schema *Schema) ParseField(fieldStruct reflect.StructField) *Field {
 		}
 	}
 
+	if val, ok := field.TagSettings["RELTYPE"]; ok {
+		field.RelType = getBool(val)
+	}
+
+	if val, ok := field.TagSettings["RELSTARTID"]; ok {
+		field.RelStartId = getBool(val)
+	}
+
+	if val, ok := field.TagSettings["RELENDID"]; ok {
+		field.RelEndId = getBool(val)
+	}
+
+	if val, ok := field.TagSettings["NODELABEL"]; ok {
+		field.NodeLabel = getBool(val)
+	}
+
+	if val, ok := field.TagSettings["NODELABELFORMAT"]; ok {
+		field.NodeLabelFormat = val
+	}
+
 	// setup permission
 	if val, ok := field.TagSettings["-"]; ok {
 		val = strings.ToLower(strings.TrimSpace(val))
@@ -446,6 +473,14 @@ func (schema *Schema) ParseField(fieldStruct reflect.StructField) *Field {
 	}
 
 	return field
+}
+
+// create valuer, setter when parse struct
+func getBool(val string) bool {
+	if strings.ToLower(val) == "true" {
+		return true
+	}
+	return false
 }
 
 // create valuer, setter when parse struct

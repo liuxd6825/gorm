@@ -59,11 +59,8 @@ type Schema struct {
 	cacheStore                *sync.Map
 }
 
-func NewSchema(name string, modelType reflect.Type, tableName string) *Schema {
+func NewSchemaEmpty() *Schema {
 	return &Schema{
-		Name:                     name,
-		ModelType:                modelType,
-		Table:                    tableName,
 		DBNames:                  make([]string, 0),
 		PrimaryFields:            make([]*Field, 0),
 		PrimaryFieldDBNames:      make([]string, 0),
@@ -90,14 +87,22 @@ func NewSchema(name string, modelType reflect.Type, tableName string) *Schema {
 	}
 }
 
-func (schema Schema) String() string {
+func NewSchema(name string, modelType reflect.Type, tableName string) *Schema {
+	empty := NewSchemaEmpty()
+	empty.Name = name
+	empty.ModelType = modelType
+	empty.Table = tableName
+	return empty
+}
+
+func (schema *Schema) String() string {
 	if schema.ModelType.Name() == "" {
 		return fmt.Sprintf("%s(%s)", schema.Name, schema.Table)
 	}
 	return fmt.Sprintf("%s.%s", schema.ModelType.PkgPath(), schema.ModelType.Name())
 }
 
-func (schema Schema) MakeSlice() reflect.Value {
+func (schema *Schema) MakeSlice() reflect.Value {
 	slice := reflect.MakeSlice(reflect.SliceOf(reflect.PointerTo(schema.ModelType)), 0, 20)
 	results := reflect.New(slice.Type())
 	results.Elem().Set(slice)
@@ -105,7 +110,7 @@ func (schema Schema) MakeSlice() reflect.Value {
 	return results
 }
 
-func (schema Schema) LookUpField(name string) *Field {
+func (schema *Schema) LookUpField(name string) *Field {
 	if field, ok := schema.FieldsByDBName[name]; ok {
 		return field
 	}
@@ -113,6 +118,11 @@ func (schema Schema) LookUpField(name string) *Field {
 		return field
 	}
 	return nil
+}
+
+func (schema *Schema) AddField(field *Field) {
+	schema.FieldsByDBName[field.DBName] = field
+	schema.FieldsByName[field.Name] = field
 }
 
 // LookUpFieldByBindName looks for the closest field in the embedded struct.

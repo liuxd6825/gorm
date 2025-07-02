@@ -49,6 +49,7 @@ const (
 	Time   DataType = "time"
 	Bytes  DataType = "bytes"
 	Json   DataType = "json"
+	Array   DataType = "array"
 )
 
 const DefaultAutoIncrementIncrement int64 = 1
@@ -105,6 +106,10 @@ type Field struct {
 	// It causes field unnecessarily migration.
 	// Therefore, we need to record the UniqueIndex on this column (exclude Mul UniqueIndex) for MigrateColumnUnique.
 	UniqueIndex string
+}
+
+func NewField() *Field {
+	return &Field{}
 }
 
 func (field *Field) BindName() string {
